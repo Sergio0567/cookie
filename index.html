@@ -12,6 +12,12 @@
 <p id="output"></p>
 <p id="ipInfo">Завантаження IP...</p>
 
+<!-- Текст + місце для виводу інформації про браузер -->
+<p><strong>Ваш браузер:</strong> <span id="browser"></span></p>
+
+<!-- Текст + місце для виводу інформації про мову інтерфейсу -->
+<p><strong>Мова інтерфейсу:</strong> <span id="lang"></span></p>
+
 <script>
     // Функція збереження cookie
     function saveCookie() {
@@ -49,6 +55,17 @@
     // Показати при завантаженні
     showSavedLanguage();
     getUserIP();
+    // Отримати User-Agent — рядок, що містить інформацію про браузер і операційну систему
+    const browserInfo = navigator.userAgent;
+
+    // Вивести цю інформацію в елемент із id="browser"
+    document.getElementById("browser").textContent = browserInfo;
+
+    // Отримати основну мову інтерфейсу браузера користувача
+    const language = navigator.language || navigator.userLanguage;
+
+    // Вивести мову в елемент із id="lang"
+    document.getElementById("lang").textContent = language;
 </script>
 
 </body>
