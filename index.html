@@ -1,0 +1,47 @@
+<!DOCTYPE html> <!-- Оголошення типу документа HTML5 -->
+<html lang="uk"> <!-- Початок HTML-документа з українською мовою -->
+<head>
+    <meta charset="UTF-8"> <!-- Встановлення кодування символів на UTF-8 -->
+    <title>Cookie demo</title> <!-- Заголовок сторінки -->
+</head>
+<body>
+
+<!-- Поле вводу для вибору мови -->
+<input type="text" id="lang" placeholder="Введіть мову">
+
+<!-- Кнопка для збереження мови в cookie -->
+<button onclick="saveCookie()">Зберегти в cookie</button>
+
+<!-- Елемент для виводу збереженої мови -->
+<p id="output"></p>
+
+<script>
+    // Функція збереження cookie
+    function saveCookie() {
+        const lang = document.getElementById("lang").value; // Отримуємо значення з текстового поля
+        document.cookie = "language=" + lang + "; path=/; max-age=86400"; // Зберігаємо в cookie на 1 добу
+        alert("Cookie збережено!"); // Повідомлення про успішне збереження
+        showSavedLanguage(); // Показуємо збережену мову
+    }
+
+    // Функція читання та виводу мови з cookie
+    function showSavedLanguage() {
+        const cookies = document.cookie.split(';'); // Розділяємо cookie на окремі частини
+        for (let i = 0; i < cookies.length; i++) {
+            const cookie = cookies[i].trim(); // Видаляємо пробіли
+            if (cookie.startsWith("language=")) { // Шукаємо cookie з ключем 'language'
+                const lang = cookie.substring("language=".length); // Витягуємо значення
+                document.getElementById("output").textContent = "Збережена мова: " + lang; // Виводимо на сторінку
+                return;
+            }
+        }
+        document.getElementById("output").textContent = "Мова ще не збережена.";
+    }
+
+    // Показати мову одразу при завантаженні сторінки
+    showSavedLanguage();
+</script>
+
+</body>
+</html>
+
