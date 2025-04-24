@@ -2,70 +2,123 @@
 <html lang="uk">
 <head>
     <meta charset="UTF-8">
-    <title>Cookie demo</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Інфо про браузер &amp; Cookie</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+            line-height: 1.5;
+        }
+        input, button {
+            margin: 5px 0;
+        }
+        #cookieInfo p {
+            margin: 4px 0;
+        }
+        #cookieInfo span {
+            font-weight: bold;
+        }
+    </style>
 </head>
 <body>
 
-<input type="text" id="lang" placeholder="Введіть мову">
-<button onclick="saveCookie()">Зберегти в cookie</button>
+<h1>Demo: Інформація про браузер та Cookie</h1>
 
-<p id="output"></p>
-<p id="ipInfo">Завантаження IP...</p>
+<!-- Ввід мови та кнопка для збереження -->
+<label for="langInput">Введіть мову (наприклад, "uk" або "en"):</label><br>
+<input type="text" id="langInput" placeholder="uk, en тощо">
+<button id="saveBtn">Зберегти мову в cookie</button>
 
-<!-- Текст + місце для виводу інформації про браузер -->
-<p><strong>Ваш браузер:</strong> <span id="browser"></span></p>
+<!-- Вивід збереженої мови -->
+<p id="output">Збережена мова: <span id="langOutput">немає</span></p>
 
-<!-- Текст + місце для виводу інформації про мову інтерфейсу -->
-<p><strong>Мова інтерфейсу:</strong> <span id="lang"></span></p>
+<!-- Вивід публічного IP -->
+<p id="ipInfo">Ваш IP: <span id="ipOutput">завантаження...</span></p>
+
+<!-- Вивід дружньої назви браузера -->
+<p>Ваш браузер: <span id="browser">завантаження...</span></p>
+
+<!-- Вивід мови інтерфейсу -->
+<p>Мова інтерфейсу: <span id="langInterface">завантаження...</span></p>
+
+<!-- Вивід усіх cookie -->
+<h2>Усі Cookie:</h2>
+<div id="cookieInfo">завантаження...</div>
 
 <script>
-    // Функція збереження cookie
-    function saveCookie() {
-        const lang = document.getElementById("lang").value;
-        document.cookie = "language=" + lang + "; path=/; max-age=86400";
-        alert("Cookie збережено!");
-        showSavedLanguage();
-    }
+    document.addEventListener("DOMContentLoaded", () => {
+        // 1. Функція для визначення дружньої назви браузера
+        function detectBrowser() {
+            const ua = navigator.userAgent.toLowerCase();
+            if (ua.includes('edg/'))                             return 'Microsoft Edge';
+            if (ua.includes('opr/') || ua.includes('opera'))     return 'Opera';
+            if (ua.includes('chrome/') && !ua.includes('edg/') && !ua.includes('opr/')) return 'Google Chrome';
+            if (ua.includes('firefox/'))                         return 'Mozilla Firefox';
+            if (ua.includes('safari/') && !ua.includes('chrome/')) return 'Safari';
+            return 'Інший';
+        }
 
-    // Вивід збереженої мови
-    function showSavedLanguage() {
-        const cookies = document.cookie.split(';');
-        for (let i = 0; i < cookies.length; i++) {
-            const cookie = cookies[i].trim();
-            if (cookie.startsWith("language=")) {
-                const lang = cookie.substring("language=".length);
-                document.getElementById("output").textContent = "Збережена мова: " + lang;
-                return;
+        // 2. Відобразити та зберегти дружнє ім'я браузера
+        const browserName = detectBrowser();
+        document.getElementById("browser").textContent = browserName;
+        document.cookie = `user_browser=${encodeURIComponent(browserName)}; path=/; max-age=86400`;
+
+        // 3. Отримати та відобразити мову інтерфейсу, зберегти в cookie
+        const uiLang = navigator.language || navigator.languages?.[0] || "невідомо";
+        document.getElementById("langInterface").textContent = uiLang;
+        document.cookie = `user_lang=${encodeURIComponent(uiLang)}; path=/; max-age=86400`;
+
+        // 4. Отримати та відобразити публічний IP через зовнішній API
+        async function getUserIP() {
+            try {
+                const res = await fetch("https://api.ipify.org?format=json");
+                const { ip } = await res.json();
+                document.getElementById("ipOutput").textContent = ip;
+            } catch (e) {
+                document.getElementById("ipOutput").textContent = "невдалося отримати IP";
             }
         }
-        document.getElementById("output").textContent = "Мова ще не збережена.";
-    }
 
-    // Функція визначення IP
-    async function getUserIP() {
-        try {
-            const response = await fetch("https://api.ipify.org?format=json");
-            const data = await response.json();
-            document.getElementById("ipInfo").textContent = "Ваш IP: " + data.ip;
-        } catch (error) {
-            document.getElementById("ipInfo").textContent = "Не вдалося отримати IP.";
+        // 5. Зчитати та показати збережену мову з cookie
+        function showSavedLanguage() {
+            const cookie = document.cookie
+                .split("; ")
+                .find(c => c.startsWith("language="));
+            const val = cookie ? decodeURIComponent(cookie.split("=")[1]) : null;
+            document.getElementById("langOutput").textContent = val || "немає";
         }
-    }
 
-    // Показати при завантаженні
-    showSavedLanguage();
-    getUserIP();
-    // Отримати User-Agent — рядок, що містить інформацію про браузер і операційну систему
-    const browserInfo = navigator.userAgent;
+        // 6. Відобразити всі cookie у вигляді списку
+        function showAllCookies() {
+            const infoDiv = document.getElementById("cookieInfo");
+            infoDiv.innerHTML = "";  // очищаємо перед виводом
+            document.cookie.split("; ").forEach(c => {
+                const [name, v] = c.split("=");
+                const p = document.createElement("p");
+                p.innerHTML = `<span>${name}:</span> ${decodeURIComponent(v || "")}`;
+                infoDiv.appendChild(p);
+            });
+        }
 
-    // Вивести цю інформацію в елемент із id="browser"
-    document.getElementById("browser").textContent = browserInfo;
+        // 7. Обробник кнопки збереження мови
+        document.getElementById("saveBtn").addEventListener("click", () => {
+            const lang = document.getElementById("langInput").value.trim();
+            if (!lang) {
+                alert("Введіть, будь ласка, код мови.");
+                return;
+            }
+            document.cookie = `language=${encodeURIComponent(lang)}; path=/; max-age=86400`;
+            showSavedLanguage();
+            showAllCookies();
+            alert("Мову збережено в cookie!");
+        });
 
-    // Отримати основну мову інтерфейсу браузера користувача
-    const language = navigator.language || navigator.userLanguage;
-
-    // Вивести мову в елемент із id="lang"
-    document.getElementById("lang").textContent = language;
+        // 8. Запуск всіх дій після завантаження сторінки
+        showSavedLanguage();
+        getUserIP();
+        showAllCookies();
+    });
 </script>
 
 </body>
