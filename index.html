@@ -1,47 +1,55 @@
-<!DOCTYPE html> <!-- Оголошення типу документа HTML5 -->
-<html lang="uk"> <!-- Початок HTML-документа з українською мовою -->
+<!DOCTYPE html>
+<html lang="uk">
 <head>
-    <meta charset="UTF-8"> <!-- Встановлення кодування символів на UTF-8 -->
-    <title>Cookie demo</title> <!-- Заголовок сторінки -->
+    <meta charset="UTF-8">
+    <title>Cookie demo</title>
 </head>
 <body>
 
-<!-- Поле вводу для вибору мови -->
 <input type="text" id="lang" placeholder="Введіть мову">
-
-<!-- Кнопка для збереження мови в cookie -->
 <button onclick="saveCookie()">Зберегти в cookie</button>
 
-<!-- Елемент для виводу збереженої мови -->
 <p id="output"></p>
+<p id="ipInfo">Завантаження IP...</p>
 
 <script>
     // Функція збереження cookie
     function saveCookie() {
-        const lang = document.getElementById("lang").value; // Отримуємо значення з текстового поля
-        document.cookie = "language=" + lang + "; path=/; max-age=86400"; // Зберігаємо в cookie на 1 добу
-        alert("Cookie збережено!"); // Повідомлення про успішне збереження
-        showSavedLanguage(); // Показуємо збережену мову
+        const lang = document.getElementById("lang").value;
+        document.cookie = "language=" + lang + "; path=/; max-age=86400";
+        alert("Cookie збережено!");
+        showSavedLanguage();
     }
 
-    // Функція читання та виводу мови з cookie
+    // Вивід збереженої мови
     function showSavedLanguage() {
-        const cookies = document.cookie.split(';'); // Розділяємо cookie на окремі частини
+        const cookies = document.cookie.split(';');
         for (let i = 0; i < cookies.length; i++) {
-            const cookie = cookies[i].trim(); // Видаляємо пробіли
-            if (cookie.startsWith("language=")) { // Шукаємо cookie з ключем 'language'
-                const lang = cookie.substring("language=".length); // Витягуємо значення
-                document.getElementById("output").textContent = "Збережена мова: " + lang; // Виводимо на сторінку
+            const cookie = cookies[i].trim();
+            if (cookie.startsWith("language=")) {
+                const lang = cookie.substring("language=".length);
+                document.getElementById("output").textContent = "Збережена мова: " + lang;
                 return;
             }
         }
         document.getElementById("output").textContent = "Мова ще не збережена.";
     }
 
-    // Показати мову одразу при завантаженні сторінки
+    // Функція визначення IP
+    async function getUserIP() {
+        try {
+            const response = await fetch("https://api.ipify.org?format=json");
+            const data = await response.json();
+            document.getElementById("ipInfo").textContent = "Ваш IP: " + data.ip;
+        } catch (error) {
+            document.getElementById("ipInfo").textContent = "Не вдалося отримати IP.";
+        }
+    }
+
+    // Показати при завантаженні
     showSavedLanguage();
+    getUserIP();
 </script>
 
 </body>
 </html>
-
